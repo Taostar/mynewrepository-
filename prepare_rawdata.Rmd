@@ -1,7 +1,7 @@
 ---
 title: "Prepare Raw Data"
 author: "Yanao Liu"
-output: html_notebook
+output: github_document
 ---
 
 ```{r}
@@ -31,8 +31,7 @@ fun_divzero = function (x) {
   x
 }
 
-fun_Fcst.Error.Bias = function (dt = test.dt, fcst = "POS_UNITS_GROSS_reg.pred", target = "POS_UNITS_GROSS"  )
-  {		
+fun_Fcst.Error.Bias = function (dt = test.dt, fcst = "POS_UNITS_GROSS_reg.pred", target = "POS_UNITS_GROSS"){		
       pred = dt[, fcst, with = F]
       actual = dt[, target, with = F]
       error = sum(abs(pred-actual))/ sum(actual)
@@ -47,14 +46,14 @@ BusCat Seasonal slope & Calendar Info
 seasonalprofile.buscat = fread("Buscat_POS_Curve.csv",
                                drop = c("V1","WEEK_POS_AVG","ANNUAL_POS_AVG", "loess"),
                                colClasses = list(factor = c("CATEGORY_CD")),
-                                stringsAsFactors = T,
-                                verbose = F)
+                               stringsAsFactors = T,
+                               verbose = F)
 setnames(seasonalprofile.buscat, c("WK", "FNLN_POS_PROFILE", "pos.slope"), c("C445_WK_NUM","SEASONAL_PROFILE","SEASONAL_SLOPE"))
 
 dt_calendar = fread("calendar.txt",
-                              # colClasses = list(character = c("FINELINE_CD")),
-                              stringsAsFactors = T,
-                              verbose = F)
+                    # colClasses = list(character = c("FINELINE_CD")),
+                    stringsAsFactors = T,
+                    verbose = F)
 
 ```
 
@@ -82,15 +81,12 @@ holiday.buscat = unique(base.data[,.(C445_WK_STRT_DATE, HOLIDAY, STORE_DAY_CLOSU
 
 
 
-fun_buscat = function (dt, varnames, type)
-{
+fun_buscat = function (dt, varnames, type){
   if (typeof(varnames) != "character") stop("ERROR: Input column names are not characters type!")
-  if (type == "sum")
-  {
+  if (type == "sum"){
     return(lapply(dt[,varnames, with = FALSE], function (x) sum(x, na.rm = TRUE)))
   }
-  else if (type == "avg")
-  {
+  else if (type == "avg"){
     return(lapply(dt[,varnames, with = FALSE], function (x) mean(x, na.rm = TRUE)))
   }
 }
@@ -152,29 +148,19 @@ fun_buscat_perc = function (base.dt, varnames)
                     for (atr in varnames) {
                         dt = unique.dt[, c("CATEGORY_CD", "PRODUCT_NUM", atr), with = F]
                         atr.levels = switch(atr, 
-                                           KVI_IND = c("Y", "N"),
-                                           PRODUCT_TYPE_CD = c("PPK","STD"),
-                                           ONLINEONLY_IND = c("Y", "N"),
-                                           OGBB = c("","GOOD", "BETTER", "BEST"),
-                                           INVENTORY_TIER = c("0","1","2","3","4"),
-                                           BRAND_TYPE_CD = c("National","Private Label"),
-                                           PRODUCT_PROFILE = c("Job or Joy", "High Ticket Discretionary", "Usable", "Consumable"),
-                                           CONSUMER_ROLE = c("Player","Destination","Emerging Destination","Convenience"))
-                       atr.names = sapply(atr.levels, function (x) paste(atr, x, "Perc", sep = "_"))      
-                       
-                       atr.dt = dt[,sapply(atr.levels, 
-                                           function (x) {lev.count = .SD[get(atr) == x, .N]; 
-                                                         total.count = .N; 
-                                                         .(lev.count/total.count)}), keyby = CATEGORY_CD]
-                       
+                                            KVI_IND = c("Y", "N"),
+                                            PRODUCT_TYPE_CD = c("PPK","STD"),
+                                            ONLINEONLY_IND = c("Y", "N"),
+                                            OGBB = c("","GOOD", "BETTER", "BEST"),
+                                            INVENTORY_TIER = c("0","1","2","3","4"),
+                                            BRAND_TYPE_CD = c("National","Private Label"),
+                                            PRODUCT_PROFILE = c("Job or Joy", "High Ticket Discretionary", "Usable", "Consumable"),
+                                            CONSUMER_ROLE = c("Player","Destination","Emerging Destination","Convenience"))
+                       atr.names = sapply(atr.levels, function (x) paste(atr, x, "Perc", sep = "_"))     
+                       # Calculate each Buscat's each attribute levels' percentage  
+                       atr.dt    = dt[,sapply(atr.levels, function (x) {lev.count = .SD[get(atr) == x, .N]; total.count = .N; .(lev.count/total.count)}), keyby = CATEGORY_CD]
                        setnames(atr.dt, atr.levels, atr.names)
-                      
                        atr.perc.buscat = merge(atr.perc.buscat, atr.dt, by = "CATEGORY_CD")
-                       # if (i == 1){
-                       #   atr.perc.buscat = atr.dt
-                       # } else {
-                       # atr.perc.buscat = cbind(atr.perc.buscat, atr.dt[,-1])}
-                       # i= i + 1
                     }
                     return(atr.perc.buscat)
                   }
@@ -366,8 +352,6 @@ test.dt$POS_UNITS_GROSS_gbm.pred = as.data.table(h2o.predict(gbm.model.h2o, test
 dl.model.h2o = h2o.deeplearning(y = y.dep, x = x.indep, training_frame = train.h2o, epochs = 60, hidden = c(100, 100), activation = "Rectifier", seed = 1122)
 h2o.performance(dl.model.h2o)
 test.dt$POS_UNITS_GROSS_dl.pred = as.data.table(h2o.predict(dl.model.h2o, test.h2o))
-
-
 
 
 ```
