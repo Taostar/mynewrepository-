@@ -1,0 +1,26 @@
+---
+title: "Promo_atr_datacleam"
+author: "Yantao Liu"
+date: "January 29, 2018"
+output: html_document
+---
+Setup env 
+```{r}
+rm(list = ls())
+gc()
+library(data.table)
+
+```
+Import data 
+
+```{r}
+#Wk_str_date is friday of deal beginning 
+promo.atr = fread("DDFSPT_ALGORITHM_INPUT_VARS.txt", header = TRUE, stringsAsFactors = T,
+                  na.strings = c("N/A", ""),
+                  colClasses = list(factor = c("FLYER_SLOT_PRIORITY_CD", "CATEGORY_CD", "SUBCATEGORY_CD", "FINELINE_CD"),
+                                      Date = c("WKSALE_START_DATE")),
+                  drop = c("PACKAGE_VOLUME_QTY","FORECAST_STORE_ORDER_QTY","FORECAST_FINAL_POS_FCTORED_QTY",  
+                           "UNFACTORED_POS_FCST_QTY", "DMOQ_QTY", "OGBB", "PRODUCT_PROFILE", "EAP_IND" ))
+
+
+```
